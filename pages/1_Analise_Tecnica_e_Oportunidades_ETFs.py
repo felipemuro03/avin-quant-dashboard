@@ -1,5 +1,4 @@
 import sys
-import io
 import datetime as dt
 from pathlib import Path
 
@@ -59,47 +58,36 @@ def render_universo_precos():
         f"Universo padrao: {len(universo_base)} ativos (editavel em data/universo_ativos.csv)"
     )
 
-    with st.expander("➕ Adicionar tickers extras (opcional)"):
+    with st.expander("➕ Adicionar ticker ao universo"):
+        categorias_disponiveis_add = sorted(universo_base["Categoria"].unique().tolist())
+        col_ticker, col_categoria, col_botao = st.columns([2, 2, 1])
+        with col_ticker:
+            novo_ticker = st.text_input("Ticker", key="novo_ticker_universo").strip().upper()
+        with col_categoria:
+            nova_categoria = st.selectbox("Categoria", categorias_disponiveis_add, key="nova_categoria_universo")
+        with col_botao:
+            st.write("")
+            st.write("")
+            adicionar_clicado = st.button("Adicionar", key="botao_adicionar_ticker_universo")
 
-        def modelo_excel_bytes():
-            modelo = pd.DataFrame({"Ticker": ["AAPL", "MSFT"]})
-            buffer = io.BytesIO()
-            modelo.to_excel(buffer, index=False)
-            return buffer.getvalue()
-
-        st.download_button(
-            "⬇️ Baixar modelo de planilha",
-            data=modelo_excel_bytes(),
-            file_name="modelo_ativos_extras.xlsx",
-            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            key="download_modelo_universo",
-        )
-        arquivo_extra = st.file_uploader(
-            "Subir planilha de tickers extras (.xlsx)", type=["xlsx"], key="upload_extra_universo"
-        )
+        if adicionar_clicado:
+            if not novo_ticker:
+                st.warning("Digite um ticker.")
+            elif novo_ticker in universo_base["Ticker"].values:
+                st.warning(f"{novo_ticker} ja esta no universo.")
+            else:
+                with st.spinner(f"Procurando {novo_ticker} no Yahoo Finance..."):
+                    resultado = precos_lib.validar_ticker(novo_ticker)
+                if resultado["valido"]:
+                    precos_lib.adicionar_ticker_ao_universo(
+                        CAMINHO_UNIVERSO, novo_ticker, nova_categoria, "-", "-", resultado["nome"]
+                    )
+                    st.success(f"{novo_ticker} ({resultado['nome']}) adicionado ao universo.")
+                    st.rerun()
+                else:
+                    st.error(f"Nao encontrei {novo_ticker} no Yahoo Finance. Confira o codigo.")
 
     universo = universo_base[universo_base["Categoria"].isin(categorias_selecionadas)].copy()
-
-    if arquivo_extra is not None:
-        extra = pd.read_excel(arquivo_extra)
-        extra.columns = [str(c).strip() for c in extra.columns]
-        col_ticker = None
-        for candidato in ["Ticker", "Nome do Produto", "Produto", "Ativo"]:
-            if candidato in extra.columns:
-                col_ticker = candidato
-                break
-        if col_ticker is None:
-            st.error("A planilha extra precisa ter uma coluna 'Ticker'.")
-        else:
-            extra = extra.rename(columns={col_ticker: "Ticker"})
-            extra["Ticker"] = extra["Ticker"].astype(str).str.strip().str.upper()
-            extra = extra.dropna(subset=["Ticker"])
-            extra = extra[~extra["Ticker"].isin(universo["Ticker"])]
-            for coluna in ["Categoria", "Subcategoria", "Duration_Bucket", "Descricao"]:
-                if coluna not in extra.columns:
-                    extra[coluna] = "Extra" if coluna == "Categoria" else "-"
-            universo = pd.concat([universo, extra[universo.columns]], ignore_index=True)
-
     universo = universo.drop_duplicates(subset="Ticker").reset_index(drop=True)
 
     if universo.empty:

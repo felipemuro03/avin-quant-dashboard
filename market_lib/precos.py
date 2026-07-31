@@ -46,6 +46,45 @@ def buscar_nomes(tickers) -> dict:
     return nomes
 
 
+def validar_ticker(ticker: str) -> dict:
+    """Confere se o ticker existe no Yahoo Finance. Usa historico de preco (mais
+    confiavel que .info, que pode vir vazio mesmo para tickers validos) para
+    decidir se existe; nome legivel e best-effort."""
+    ticker = ticker.strip().upper()
+    try:
+        historico = yf.Ticker(ticker).history(period="5d")
+    except Exception:
+        return {"valido": False, "nome": None}
+    if historico.empty:
+        return {"valido": False, "nome": None}
+    nome = ticker
+    try:
+        info = yf.Ticker(ticker).info
+        nome = info.get("longName") or info.get("shortName") or ticker
+    except Exception:
+        pass
+    return {"valido": True, "nome": nome}
+
+
+def adicionar_ticker_ao_universo(caminho_csv, ticker: str, categoria: str, subcategoria: str,
+                                  duration_bucket: str, descricao: str) -> bool:
+    """Acrescenta um ticker ao universo_ativos.csv. Retorna False se ja existir."""
+    df = carregar_universo(caminho_csv)
+    ticker = ticker.strip().upper()
+    if ticker in df["Ticker"].values:
+        return False
+    nova_linha = pd.DataFrame([{
+        "Ticker": ticker,
+        "Categoria": categoria,
+        "Subcategoria": subcategoria or "-",
+        "Duration_Bucket": duration_bucket or "-",
+        "Descricao": descricao or "-",
+    }])
+    df = pd.concat([df, nova_linha], ignore_index=True)
+    df.to_csv(caminho_csv, index=False)
+    return True
+
+
 def variacao_percentual(serie: pd.Series, dias: int) -> float:
     if len(serie) < 2:
         return np.nan
