@@ -60,11 +60,13 @@ def render_universo_precos():
 
     with st.expander("➕ Adicionar ticker ao universo"):
         categorias_disponiveis_add = sorted(universo_base["Categoria"].unique().tolist())
-        col_ticker, col_categoria, col_botao = st.columns([2, 2, 1])
+        col_ticker, col_categoria, col_subcategoria, col_botao = st.columns([2, 2, 2, 1])
         with col_ticker:
             novo_ticker = st.text_input("Ticker", key="novo_ticker_universo").strip().upper()
         with col_categoria:
             nova_categoria = st.selectbox("Categoria", categorias_disponiveis_add, key="nova_categoria_universo")
+        with col_subcategoria:
+            nova_subcategoria = st.text_input("Subcategoria", key="nova_subcategoria_universo").strip()
         with col_botao:
             st.write("")
             st.write("")
@@ -80,7 +82,7 @@ def render_universo_precos():
                     resultado = precos_lib.validar_ticker(novo_ticker)
                 if resultado["valido"]:
                     precos_lib.adicionar_ticker_ao_universo(
-                        CAMINHO_UNIVERSO, novo_ticker, nova_categoria, "-", "-", resultado["nome"]
+                        CAMINHO_UNIVERSO, novo_ticker, nova_categoria, nova_subcategoria, "-", resultado["nome"]
                     )
                     st.success(f"{novo_ticker} ({resultado['nome']}) adicionado ao universo.")
                     st.rerun()
