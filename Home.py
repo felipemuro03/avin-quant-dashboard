@@ -16,59 +16,22 @@ if caminho_logo.exists():
     st.image(str(caminho_logo), width=280)
 
 st.title("AVIN Quant Dashboard")
-st.caption("Universo global de ativos, cenario macro e leitura de valor relativo — foco offshore.")
+st.caption("Universo global de ativos e leitura de valor relativo — foco offshore.")
 
 st.divider()
 
-col1, col2, col3 = st.columns(3)
-
-with col1:
-    st.subheader("📈 Universo e Precos")
-    st.write(
-        "Performance do universo de ativos (renda variavel, renda fixa por duration/credito "
-        "e alternativos) e backtest de alocacoes hipoteticas."
-    )
-
-with col2:
-    st.subheader("🇺🇸 Cenario Macro EUA")
-    st.write(
-        "Crescimento, inflacao, emprego, juros e mercados — indicadores oficiais via FRED."
-    )
-
-with col3:
-    st.subheader("🔗 Correlacoes e Valor Relativo")
-    st.write(
-        "Matriz de correlacao, posicao no range (min/media/max/atual) e ranking de z-score "
-        "de preco vs. a propria historia."
-    )
-
-col4, col5, col6 = st.columns(3)
-
-with col4:
-    st.subheader("📄 Snapshot para Analise")
-    st.write(
-        "Exporta um Markdown com macro + performance + valor relativo + tecnica + correlacoes — "
-        "para trazer numa conversa com a Claude junto com research de terceiros e pedir a "
-        "leitura de oportunidades e riscos."
-    )
-
-with col5:
-    st.subheader("📉 Analise Tecnica")
-    st.write(
-        "Medias moveis (MA20/50/100/200) e o comportamento do preco em relacao a elas, "
-        "momentum (RSI) e volatilidade (regime + Bandas de Bollinger)."
-    )
-
-with col6:
-    st.subheader("🎯 Oportunidades Consolidadas")
-    st.write(
-        "Cruza valor relativo, posicao no range e momentum num score simples e auditavel — "
-        "leitura de mean reversion, com todos os componentes visiveis, nao uma caixa-preta."
-    )
+st.subheader("🎯 Analise Tecnica e Oportunidades ETFs")
+st.write(
+    "Uma unica pagina com 4 sub-abas: performance do universo de ativos (renda variavel, "
+    "renda fixa por duration/credito e alternativos) e backtest de alocacoes hipoteticas; "
+    "matriz de correlacao, posicao no range e ranking de z-score; medias moveis, RSI e "
+    "volatilidade (Bandas de Bollinger); e um score consolidado de oportunidades cruzando "
+    "valor relativo, posicao no range e momentum."
+)
 
 st.divider()
 st.caption(
-    "Use o menu na barra lateral para navegar entre as paginas. "
+    "Use o menu na barra lateral para abrir a pagina. "
     "O universo de ativos padrao fica em data/universo_ativos.csv — edite esse arquivo para "
     "adicionar ou remover tickers."
 )

@@ -3,7 +3,5 @@ pandas
 numpy
 plotly
 yfinance
-fredapi
-python-dotenv
 openpyxl
 requests
