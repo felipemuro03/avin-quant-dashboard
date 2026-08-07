@@ -9,14 +9,14 @@ sys.path.insert(0, str(RAIZ_PROJETO))
 from market_lib.pagina_ativos import renderizar_pagina
 from market_lib.estilo import aplicar_estilo
 
-st.set_page_config(page_title="Analise Tecnica e Oportunidades ETFs", layout="wide", page_icon="🎯")
+st.set_page_config(page_title="Analise Tecnica e Oportunidades Stocks", layout="wide", page_icon="📈")
 aplicar_estilo()
 
-CAMINHO_UNIVERSO = RAIZ_PROJETO / "data" / "universo_ativos.csv"
+CAMINHO_UNIVERSO = RAIZ_PROJETO / "data" / "universo_acoes.csv"
 
 renderizar_pagina(
     caminho_universo=CAMINHO_UNIVERSO,
-    titulo="Analise Tecnica e Oportunidades ETFs",
-    chave_prefixo="etf",
-    permitir_nova_categoria=False,
+    titulo="Analise Tecnica e Oportunidades Stocks",
+    chave_prefixo="stock",
+    permitir_nova_categoria=True,
 )
