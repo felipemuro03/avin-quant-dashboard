@@ -399,15 +399,6 @@ def renderizar_pagina(caminho_universo, titulo, chave_prefixo, permitir_nova_cat
         aba_medias, aba_momentum, aba_vol = st.tabs(["Medias Moveis", "Momentum (RSI)", "Volatilidade (Bollinger)"])
 
         with aba_medias:
-            df_ma = tecnica.medias_moveis(serie_selecionada)
-            fig_ma = go.Figure()
-            fig_ma.add_trace(go.Scatter(x=df_ma.index, y=df_ma["Preco"], name="Preco", line=dict(color=NAVY, width=2)))
-            cores_ma = {"MA20": "#896F3D", "MA50": "#1b7a3d", "MA100": "#C8BEAA", "MA200": "#b3261e"}
-            for coluna, cor in cores_ma.items():
-                fig_ma.add_trace(go.Scatter(x=df_ma.index, y=df_ma[coluna], name=coluna, line=dict(color=cor, width=1.5)))
-            fig_ma.update_layout(height=450, yaxis_title="Preco (US$)", legend_title="Serie")
-            st.plotly_chart(fig_ma, use_container_width=True)
-
             estrutura = tecnica.estrutura_tendencia(serie_selecionada)
             col1, col2, col3 = st.columns(3)
             col1.metric("Acima de quantas medias (0-4)", estrutura["acima_de"])
