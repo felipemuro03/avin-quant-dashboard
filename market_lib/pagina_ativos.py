@@ -396,14 +396,7 @@ def renderizar_pagina(caminho_universo, titulo, chave_prefixo, permitir_nova_cat
         serie_selecionada = tabela_precos[ticker_selecionado].dropna()
         st.caption(f"**{nomes.get(ticker_selecionado, ticker_selecionado)}** — {descricoes.get(ticker_selecionado, '')}")
 
-        aba_medias, aba_momentum, aba_vol = st.tabs(["Medias Moveis", "Momentum (RSI)", "Volatilidade (Bollinger)"])
-
-        with aba_medias:
-            estrutura = tecnica.estrutura_tendencia(serie_selecionada)
-            col1, col2, col3 = st.columns(3)
-            col1.metric("Acima de quantas medias (0-4)", estrutura["acima_de"])
-            col2.metric("Tendencia (MA50 x MA200)", estrutura["tendencia"])
-            col3.metric("Cruzamento nos ultimos 10 pregoes", "Sim" if estrutura["cruzamento_recente"] else "Nao")
+        aba_momentum, aba_vol = st.tabs(["Momentum (RSI)", "Volatilidade (Bollinger)"])
 
         with aba_momentum:
             serie_rsi = tecnica.rsi(serie_selecionada, periodo_rsi).dropna()
