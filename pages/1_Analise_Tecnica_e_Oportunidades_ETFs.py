@@ -15,6 +15,7 @@ from market_lib import precos as precos_lib
 from market_lib import analise
 from market_lib import tecnica
 from market_lib import consolidado as consolidado_lib
+from market_lib import lamina as lamina_lib
 from market_lib.estilo import aplicar_estilo, NAVY, GOLD_ESCURO
 
 st.set_page_config(page_title="Analise Tecnica e Oportunidades ETFs", layout="wide", page_icon="🎯")
@@ -539,22 +540,39 @@ def render_analise_tecnica():
 # ==========================================================================
 def render_oportunidades():
     st.caption(
-        "Cruza valor relativo (z-score + posicao no range) com momentum (RSI) numa unica tabela, "
-        "com um score simples e auditavel — nao e caixa-preta e nao e recomendacao de compra/venda."
+        "Ranking de reversao: aponta quais ativos estao mais descontados em relacao a propria "
+        "media historica de preco (nao diz o motivo do desconto — fundamento, noticia, fluxo — so "
+        "aponta a estatistica)."
     )
 
-    with st.expander("Como ler o Score de Reversao (leia antes de usar)", expanded=True):
+    with st.expander("Como ler esta tabela (leia antes de usar)", expanded=True):
         st.markdown(
-            "O **Score de Reversao (0-100)** e a media de 3 percentis, calculados dentro do "
-            "universo filtrado:\n\n"
-            "- **Percentil Valor**: quao barato o ativo esta vs. a propria historia (z-score baixo → percentil alto)\n"
-            "- **Percentil Range**: quao perto do fundo do range de preco ele esta (posicao baixa → percentil alto)\n"
-            "- **Percentil Momentum**: quao sobrevendido ele esta pelo RSI (RSI baixo → percentil alto)\n\n"
-            "Isso e uma leitura de **mean reversion** (aposta estatistica de que preco muito "
-            "esticado tende a voltar pra media) — **nao e a unica leitura valida**. Quem segue "
-            "tendencia leria a mesma tabela ao contrario (RSI alto + acima das medias = forca). "
-            "Por isso todos os componentes crus ficam visiveis ao lado do score, e as colunas de "
-            "tendencia/volatilidade ficam disponiveis para voce julgar o contexto, nao so o numero final."
+            "**Em uma frase:** o Score de Reversao (0-100) rankeia os ativos do mais \"descontado\" "
+            "pra baixo (perto de 100) ao mais \"esticado\" pra cima (perto de 0), olhando so pro "
+            "comportamento do preco.\n\n"
+            "**Glossario das colunas:**\n\n"
+            "- **Score Reversao (0-100)**: media das 3 leituras abaixo — quanto mais alto, mais "
+            "descontado o ativo esta nas 3 ao mesmo tempo\n"
+            "- **Z-Score**: quantos desvios-padrao o preco atual esta da propria media historica "
+            "(negativo = abaixo da media, ou seja mais barato do que o normal para ele mesmo)\n"
+            "- **Posicao (%)**: onde o preco esta hoje entre a minima (0%) e a maxima (100%) do "
+            "periodo escolhido\n"
+            "- **RSI**: indicador de momentum de 0 a 100 — abaixo de 30 e considerado sobrevendido, "
+            "acima de 70 e considerado sobrecomprado\n"
+            "- **Acima de (0-4)** / **Tendencia (MA50 x MA200)**: quantas medias moveis o preco esta "
+            "acima e se as medias de 50 e 200 dias apontam pra alta ou pra baixa — contexto de "
+            "tendencia, nao entra na conta do score\n"
+            "- **Z-Score Vol**: se o ativo esta mais ou menos volatil do que o normal pra ele mesmo — "
+            "tambem so contexto, nao entra no score\n\n"
+            "**Exemplo:** um ETF com Z-Score de -1,5 (bem abaixo da media historica), Posicao de "
+            "10% no range (perto do fundo de 52 semanas) e RSI de 25 (sobrevendido) fica com score "
+            "proximo de 100. Ja um ETF caro, no topo do range e com RSI de 80 fica com score "
+            "proximo de 0.\n\n"
+            "**Atencao — isso e so uma das leituras possiveis:** o score assume uma logica de "
+            "**mean reversion** (aposta estatistica de que preco muito esticado tende a voltar pra "
+            "media) — **nao e a unica leitura valida nem uma recomendacao**. Quem segue tendencia "
+            "leria a mesma tabela ao contrario (RSI alto + preco acima das medias = forca, nao "
+            "fraqueza). Por isso todos os componentes crus ficam visiveis ao lado do score."
         )
 
     col_f1, col_f2, col_f3 = st.columns([2, 1, 1])
@@ -644,6 +662,30 @@ def render_oportunidades():
     st.caption(
         "Leitura puramente estatistica sobre preco — nao considera fundamento, fluxo, catalisadores "
         "ou cenario macro."
+    )
+
+    st.divider()
+    st.subheader("Lamina de Oportunidades")
+    st.caption(
+        "Gera um PDF de 1 pagina, so com as tabelas do que esta filtrado acima — pratico pra "
+        "mandar pro gestor ou guardar o retrato da semana."
+    )
+    col_lamina1, col_lamina2 = st.columns([1, 3])
+    with col_lamina1:
+        top_n_lamina = st.slider("Ativos por tabela", 3, 20, 10, key="top_n_lamina")
+
+    pdf_bytes = lamina_lib.gerar_lamina_pdf(
+        consolidado,
+        categorias_selecionadas,
+        anos_valor_relativo,
+        periodo_rsi,
+        top_n=top_n_lamina,
+    )
+    st.download_button(
+        "Gerar lamina (PDF)",
+        data=pdf_bytes,
+        file_name=f"avin_lamina_oportunidades_{dt.date.today().isoformat()}.pdf",
+        mime="application/pdf",
     )
 
 
